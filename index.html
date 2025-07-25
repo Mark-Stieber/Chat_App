@@ -3,35 +3,62 @@
 <head>
 <title>Chat_App</title>
 <style>
-    body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;} 
+    html {height: 100%;}
+    body {height: 100%; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;} 
 
-    .wrapper {
+    .container {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: 1fr auto;
+        grid-template-columns: 2fr 2fr 1fr;
+        grid-template-rows: 4fr 3fr 1fr;
+        height: 100%;
+        gap: 5px;
+        background-color: rgb(127, 193, 255);
+        border-radius: 5px;
         grid-template-areas:
-            "a a b"
-            "a a b"
-            "c c c";
-    }
-    .item1 {
-        grid-area: a;
-    }
-    .item2 {
-        grid-area: b;
-    }
-    .item3 {
-        grid-area: c;
+            "chat chat users"
+            "chat chat groups"
+            "forminput forminput groups";
     }
 
-    #form { background: rgb(196, 196, 196); padding: 0.35rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px);}
-    #inputText {flex-grow: 1;}
+    .container > div {
+        background-color: rgb(201, 238, 255);
+    }
+
+    .currentUsers {
+        grid-area: users;
+        padding: 10px;
+    }
+    .chat {
+        grid-area: chat;
+    }
+    .groups {
+        grid-area: groups;
+        padding: 10px;
+    }
+    .forminput {
+        grid-area: forminput;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .textarea{
+        resize: none;
+    }
+
+    #form { background: rgb(196, 196, 196); width: 100%; padding: 0.35rem; display: flex; height: 100%; box-sizing: border-box; backdrop-filter: blur(10px);}
+    
+    #inputText {flex-grow: 1; box-sizing: border-box; font-size: 15px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        padding: 10px;
+    }
+    
     #form > button {background: rgba(128, 204, 255, 0.15); display: flex; justify-content: center; align-items: center; padding: 10px 10px;}
     #form > button:hover { background-color: rgba(57, 171, 247, 0.35);}
-    #messages {list-style-type: none; margin: 0; padding: 0;}
-    #messages > li { padding: 0.5rem 1rem; }
-    #messages > li:nth-child(odd) { background: #ececec; }
-    #users {list-style-type: none; background:rgba(255, 0, 0, 0.15); margin: 0; padding: 0;}
+    
+    #messages {list-style-type: none; margin: 0; padding: 0; width: 100%;}
+    #messages > li { padding: 0.5rem 1rem;}
+    #messages > li:nth-child(odd) { background: rgb(0, 174, 255); }
+    #users {list-style-type: none; margin: 0; padding: 0;}
     #users > li { padding: 0.5rem 1rem;}
 
 </style>
@@ -40,16 +67,24 @@
 
 <body>
 
-<div class="wrapper">
-    <ul class="item1" id="messages"></ul>
-    <ul class="item2" id="users">Current Users Will Go Here</ul>
-    <div class="item3">
+<div class="container">
+    <div class="chat">
+        <ul id="messages"> Hello </ul>
+    </div>
+    <div class="currentUsers">
+        <ul id="users">Current Users Will Go Here</ul>
+    </div>
+    <div class="groups">GROUPS</div>
+    <div class="forminput">
         <form id="form" action="">
-            <input id="inputText" autocomplete="off">
+            <textarea id="inputText" maxlength="500" wrap="soft" class="textarea"></textarea>
             <button>Send</button>
         </form>
+
+
     </div>
 </div>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -79,8 +114,8 @@
     var input = document.getElementById('inputText');
     var messages = document.getElementById('messages');
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
         if (input.value) {
             var msg = ''+username+': '+input.value;
             socket.emit('chat message', msg);
@@ -91,6 +126,14 @@
             li.textContent = msg;
             messages.appendChild(li);
             window.scrollTo(0, document.body.scrollHeight);
+        }
+    });
+
+    // Text Area Enter-Key Send
+    document.getElementById('inputText').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevents the default action of the Enter key
+            form.requestSubmit();
         }
     });
 
@@ -106,5 +149,5 @@
     // First Get Username 
     window.addEventListener('DOMContentLoaded', getUser);
 </script>
-</body>
+
 </html>
