@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chat_App</title>
+<style>
+    body { display: flex; justify-content: center; align-items: center; margin: 0; height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;}
+    /*#form {}*/
+    #input {border-color: aliceblue;}
+    #form > button {border-color: aliceblue; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;}
+</style>
+
+</head>
+<body>
+<H1>Enter Your Username: </H1>
+<form id="form" action="">
+    <input id="input" autocomplete="off">
+    <button>Confirm</button>
+</form>
+<div id="usernametaken"></div>
+
+<script>
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // Stop the default form submission
+
+        // Send server Username
+        if (input.value) {
+            var Username = input.value;
+
+            async function fetching(){
+                var value = await fetch('/username', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({username: Username}),
+                });
+                const recv = await value.json();
+                console.log(recv);
+                
+                if(recv.message != "username taken"){
+                    input.value = '';
+                    window.location.href = '/index';
+                }
+                else{
+                    var d = document.getElementById("usernametaken");
+                    d.innerText = "Username Taken";
+                    input.value = '';
+                }
+            }
+            fetching();
+        }
+
+        //console.log(value)
+        // Receive URL
+        /*
+        var url = ''
+        socket.on('indexurl', (item) => {
+            url = item;
+        })
+        */
+
+        // Redirect manually
+        //window.location.href = '/index';
+    })
+
+</script>
+</body>
+</html>
