@@ -12,7 +12,7 @@
         grid-template-rows: 4fr 3fr 1fr;
         height: 100%;
         gap: 5px;
-        background-color: rgb(127, 193, 255);
+        background-color: rgb(104, 104, 104);
         border-radius: 5px;
         grid-template-areas:
             "chat chat users"
@@ -30,6 +30,9 @@
     }
     .chat {
         grid-area: chat;
+        overflow: auto;
+        scrollbar-color: rgb(102, 207, 255) rgb(104, 104, 104);
+        scrollbar-width: thin;
     }
     .groups {
         grid-area: groups;
@@ -68,8 +71,8 @@
 <body>
 
 <div class="container">
-    <div class="chat">
-        <ul id="messages"> Hello </ul>
+    <div id="chatspace" class="chat">
+        <ul id="messages"> Chat: </ul>
     </div>
     <div class="currentUsers">
         <ul id="users">Current Users Will Go Here</ul>
@@ -122,10 +125,11 @@
             input.value = '';
 
             // Putting message to page
-            var li = document.createElement("li");
+            var li = document.createElement('li');
             li.textContent = msg;
             messages.appendChild(li);
-            window.scrollTo(0, document.body.scrollHeight);
+
+            scrolltobottom('chatspace');
         }
     });
 
@@ -139,12 +143,20 @@
 
     socket.on("return message",(msg) => {
         // Putting message to page
-        var li = document.createElement("li");
+        var li = document.createElement('li');
         li.textContent = msg;
         messages.appendChild(li);
 
-        window.scrollTo(0, document.body.scrollHeight);
+        scrolltobottom('chatspace');
     })
+
+
+
+    // Functions 
+    function scrolltobottom(id){
+        var element = document.getElementById(id);
+        element.scrollTo(0, element.scrollHeight);
+    }
 
     // First Get Username 
     window.addEventListener('DOMContentLoaded', getUser);
