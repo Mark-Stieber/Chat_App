@@ -75,7 +75,7 @@
         <ul id="messages"> Chat: </ul>
     </div>
     <div class="currentUsers">
-        <ul id="users">Current Users Will Go Here</ul>
+        <ul id="users">Users: </ul>
     </div>
     <div class="groups">GROUPS</div>
     <div class="forminput">
@@ -93,15 +93,15 @@
 <script>
     // Init await vars
     let username = null;
+    let usernameAry = [];
 
     // Getting Username from startup page
-    async function getUser() {
-        const res = await fetch('/getUser', {
+    async function getcurrentUser() {
+        const res = await fetch('/getcurrentUser', {
             credentials: 'include'
         });
 
         const data = await res.json();
-        
         // If no username data
         if(data.username == undefined){
             window.location.href = '/';
@@ -111,6 +111,26 @@
             socket.emit('userdata', username);
         }
     }
+
+    var users = document.getElementById('users');
+
+    async function getUsers() {
+        const res = await fetch('/getUsers', {
+            credentials: 'include'
+        });
+
+        users.replaceChildren();
+        users.textContent = "Users: "
+
+        const data = await res.json();
+        usernameAry = data.usernames;
+        for(var i = 0; i < usernameAry.length; i++){
+            var li = document.createElement('li');
+            li.textContent = usernameAry[i];
+            users.appendChild(li);
+        }
+    }
+
 
     var socket = io();
     var form = document.getElementById('form');
@@ -141,6 +161,11 @@
         }
     });
 
+    socket.on("usersChanged", () => {
+        console.log(usernameAry);
+        getUsers();
+    })
+
     socket.on("return message",(msg) => {
         // Putting message to page
         var li = document.createElement('li');
@@ -159,7 +184,7 @@
     }
 
     // First Get Username 
-    window.addEventListener('DOMContentLoaded', getUser);
+    window.addEventListener('DOMContentLoaded', getcurrentUser, getUsers());
 </script>
 
 </html>

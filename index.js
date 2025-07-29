@@ -21,8 +21,8 @@ const sessionMiddleware = session({
 // Keep track of usernames to avoid dups.
 const usernameMap = new Map()
 
+// Init using session
 io.engine.use(sessionMiddleware);
-
 app.use(sessionMiddleware);
 
 app.get('/', (req,res) => {
@@ -31,6 +31,8 @@ app.get('/', (req,res) => {
 
 app.post('/username', (req,res) => {
     const username = req.body.username;
+    
+    // making sure duplicate names are not allowed
     if(usernameMap.get(username) == undefined){
         usernameMap.set(username,0);
         req.session.username = username;
@@ -41,8 +43,18 @@ app.post('/username', (req,res) => {
     }
 })
 
-app.get('/getUser', (req,res) => {
+// Sends Index current user
+app.get('/getcurrentUser', (req,res) => {
     res.send({username: req.session.username});
+})
+
+// Sends index array of all usernames
+app.get('/getUsers', (req,res) => {
+    let usernameAry = [];
+    for(let key of usernameMap.keys()){
+        usernameAry.push(key);
+    }
+    res.send({usernames: usernameAry});
 })
 
 app.get('/index', (req,res) => {
@@ -52,23 +64,31 @@ app.get('/index', (req,res) => {
 io.on('connection', (socket) => {
     // disconnect users with no username
     var username = socket.request.session.username;
+    console.log(usernameMap);
     if(username == undefined){
         socket.disconnect();
     }
 
+    // Shows a user connected in terminal
     socket.on('userdata', (msg) => {
         console.log('user '+username+' connected ');
+        socket.broadcast.emit('usersChanged');
     })
 
+    // Sends message to all users except the user who sent the message.
     socket.on('chat message', (msg) => {
         console.log('message: ' + msg);
         socket.broadcast.except(socket.rooms).emit('return message', msg);
     })
 
-    //socket.broadcast.in().emit
+    // When a user disconnects
     socket.on('disconnect', () => {
         console.log('user '+username+' disconnected');
         usernameMap.delete(username);
+
+        // Tell everyone to change usernames list.
+        socket.broadcast.emit('usersChanged');
+
         socket.request.session.destroy((err) => {
             if(err){
                 console.log("disconnect ERROR");
